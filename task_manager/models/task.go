@@ -1,11 +1,14 @@
 package models
 
-import "time"
+import (
+	"time"
+
+)
 
 type Task struct {
-	ID          int    `json:"id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	DueDate     time.Time `json:"due_date"`
-	Status      string    `json:"status"`
+	ID          int                `bson:"id" json:"id"`
+	Title       string             `bson:"title" json:"title"`
+	Description string             `bson:"description" json:"description"`
+	DueDate     time.Time          `bson:"due_date" json:"due_date"`
+	Status      string             `bson:"status" json:"status"`
 }

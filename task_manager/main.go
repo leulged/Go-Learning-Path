@@ -1,8 +1,12 @@
 package main
 
-import "task_manager/router"
+import (
+	"task_manager/data"
+	"task_manager/router"
+)
 
 func main() {
-	router := router.SetupRouter()
-	router.Run(":8080")
+	data.ConnectToMongo()
+	r := router.SetupRouter()
+	r.Run(":8080")
 }
