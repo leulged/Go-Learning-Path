@@ -1,15 +1,16 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
-
+// Validates if the score is between 0 and 100
 func check(score int) bool {
 	return score >= 0 && score <= 100
 }
 
-
+// Calculates the average score from a map of course scores
 func calculateAverage(grades map[string]int) float64 {
-
 	if len(grades) == 0 {
 		return 0
 	}
@@ -35,9 +36,26 @@ func main() {
 
 	for i := 0; i < subjTaken; i++ {
 		var course string
-		fmt.Println("Please enter the course name:")
-		fmt.Scanln(&course)
 
+		// Course name validation loop
+		for {
+			fmt.Println("Please enter the course name:")
+			fmt.Scanln(&course)
+
+			if course == "" {
+				fmt.Println("Course name cannot be empty. Try again.")
+				continue
+			}
+
+			if _, exists := studentInfo[course]; exists {
+				fmt.Println("You already entered this course. Try a different one.")
+				continue
+			}
+
+			break
+		}
+
+		// Score input and validation loop
 		var score int
 		fmt.Println("Please enter the score you got for", course)
 		fmt.Scanln(&score)
@@ -61,9 +79,11 @@ func main() {
 			}
 		}
 
+		// Store course and score
 		studentInfo[course] = score
 	}
 
+	// Output the results
 	fmt.Printf("\nStudent Name: %s\n", name)
 	fmt.Println("Grades:")
 	for subject, score := range studentInfo {
