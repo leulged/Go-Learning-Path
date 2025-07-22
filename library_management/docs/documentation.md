@@ -31,9 +31,8 @@ library_management/
 ├── services/
 │   └── library_service.go       # Business logic and data management
 ├── docs/
-│   └── documentation.md         # Additional documentation (optional)
+│   └── documentation.md         # Project documentation
 ├── go.mod                       # Module definition
-└── README.md                    # Project documentation
 ```
 
 ---
