@@ -391,7 +391,7 @@ curl -X POST http://localhost:8080/user/promote \
 
 ## Notes
 
-- All `id` values are custom-generated integers (not ObjectIDs).
+- All `id` are onject id.
 - Dates must follow ISO 8601 format: `"YYYY-MM-DDTHH:MM:SSZ"`
 - Status must be one of: `"Pending"`, `"In Progress"`, `"Completed"`
 - JWT tokens expire after 24 hours

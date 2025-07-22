@@ -2,30 +2,31 @@ package controllers
 
 import (
 	"net/http"
-	"task_manager/models"
-	"task_manager/services"
+	"task_manager/domain"
+	"task_manager/Usecases"
+	"task_manager/Delivery/http/request"
 
 	"github.com/gin-gonic/gin"
 )
 
 type UserController struct {
-	Service services.UserService
+	Service Usecases.UserUsecase
 }
 
-func NewUserController(service services.UserService) *UserController {
+func NewUserController(service Usecases.UserUsecase) *UserController {
 	return &UserController{Service: service}
 }
 
 // Register new user
 func (uc *UserController) Register(c *gin.Context) {
-	var input models.RegisterInput
+	var input request.RegisterInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Convert RegisterInput to User
-	user := models.User{
+	user := domain.User{
 		Name:     input.Name,
 		Email:    input.Email,
 		Password: input.Password,
@@ -42,7 +43,7 @@ func (uc *UserController) Register(c *gin.Context) {
 
 // Login existing user
 func (uc *UserController) Login(c *gin.Context) {
-	var input models.LoginInput
+	var input request.LoginInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -54,12 +55,15 @@ func (uc *UserController) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"token": token,
+	})
 }
 
 // Promote user to admin
 func (uc *UserController) Promote(c *gin.Context) {
-	var input models.PromoteInput
+	var input request.PromoteInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
