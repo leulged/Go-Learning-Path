@@ -1,9 +1,8 @@
-package Usecases
+package usecases
 
 import (
 	"task_manager/domain"
 )
-
 
 type TaskUsecase interface {
 	GetTasks() []domain.Task
@@ -39,5 +38,4 @@ func (u *taskUsecase) UpdateTask(id string, updatedTask domain.Task) (domain.Tas
 
 func (u *taskUsecase) DeleteTask(id string) error {
 	return u.taskRepo.DeleteTask(id)
-}
-
+} 

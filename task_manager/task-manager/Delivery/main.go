@@ -11,19 +11,14 @@ import (
 	"task_manager/Delivery/routers"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	// Load environment variables (optional)
-	// e.g., using github.com/joho/godotenv
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	 log.Println("No .env file found")
-	// }
-
-	// Set MongoDB URI if not set
-	if os.Getenv("MONGODB_URI") == "" {
-		os.Setenv("MONGODB_URI", "mongodb+srv://leulgedion224:YtxgbwYFwW9snTti@cluster0.gdmxw28.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+	// Load environment variables from .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("No .env file found")
 	}
 
 	// Connect to MongoDB

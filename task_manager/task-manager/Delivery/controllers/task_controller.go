@@ -3,7 +3,7 @@ package controllers
 import (
 	"net/http"
 	"task_manager/domain"
-	"task_manager/Usecases"
+	usecases "task_manager/Usecases"
 	"task_manager/Delivery/http/request"
 
 	"github.com/gin-gonic/gin"
@@ -12,11 +12,11 @@ import (
 
 // TaskController handles task-related HTTP requests
 type TaskController struct {
-	Service Usecases.TaskUsecase
+	Service usecases.TaskUsecase
 }
 
 // NewTaskController creates and returns a new TaskController instance
-func NewTaskController(service Usecases.TaskUsecase) *TaskController {
+func NewTaskController(service usecases.TaskUsecase) *TaskController {
 	return &TaskController{
 		Service: service,
 	}

@@ -1,4 +1,4 @@
-package Usecases
+package usecases
 
 import (
 	"errors"
@@ -81,4 +81,4 @@ func (u *userUsecase) PromoteToAdmin(email string) error {
 
 func (u *userUsecase) GetUserByEmail(email string) (domain.User, error) {
 	return u.userRepo.GetUserByEmail(email)
-}
+} 

@@ -3,18 +3,22 @@ package controllers
 import (
 	"net/http"
 	"task_manager/domain"
-	"task_manager/Usecases"
+	usecases "task_manager/Usecases"
 	"task_manager/Delivery/http/request"
 
 	"github.com/gin-gonic/gin"
 )
 
+// UserController handles user-related HTTP requests
 type UserController struct {
-	Service Usecases.UserUsecase
+	Service usecases.UserUsecase
 }
 
-func NewUserController(service Usecases.UserUsecase) *UserController {
-	return &UserController{Service: service}
+// NewUserController creates and returns a new UserController instance
+func NewUserController(service usecases.UserUsecase) *UserController {
+	return &UserController{
+		Service: service,
+	}
 }
 
 // Register new user
