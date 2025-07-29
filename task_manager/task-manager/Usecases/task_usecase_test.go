@@ -1,90 +1,107 @@
 package usecases_test
 
 import (
-    "testing"
+	"testing"
+	"time"
+	"task_manager/Domain/entities"
+	"task_manager/Domain/errors"
+	"task_manager/mocks"
+	usecase "task_manager/Usecases"
 
-    "task_manager/domain"
-    usecase "task_manager/Usecases"
-    "task_manager/mocks"
-
-    "github.com/golang/mock/gomock"
-    "github.com/stretchr/testify/assert"
-    "go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestGetTasksByID(t *testing.T) {
-    ctrl := gomock.NewController(t)
-    defer ctrl.Finish()
+func TestGetTaskByID(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-    mockTaskRepo := mocks.NewMockTaskRepository(ctrl)
+	mockTaskRepo := mocks.NewMockTaskRepository(ctrl)
 
-    // sample data
-    taskID := "1"
-    objectID, _ := primitive.ObjectIDFromHex("507f1f77bcf86cd799439011")
-    expected := domain.Task{
-        ID:          objectID,
-        Title:       "Test Task",
-        Description: "Test Description",
-        Status:      "pending",
-    }
+	// sample data
+	taskID := "507f1f77bcf86cd799439011"
+	expected := entities.Task{
+		ID:          taskID,
+		Title:       "Test Task",
+		Description: "Test Description",
+		Status:      "Pending",
+		DueDate:     time.Now(),
+	}
 
-    mockTaskRepo.EXPECT().GetTaskByID(taskID).Return(expected, nil)
+	mockTaskRepo.EXPECT().GetTaskByID(taskID).Return(expected, nil)
 
-    taskUsecase := usecase.NewTaskUsecase(mockTaskRepo)
-    task, err := taskUsecase.GetTaskByID(taskID)
+	taskUsecase := usecase.NewTaskUsecase(mockTaskRepo)
+	task, err := taskUsecase.GetTaskByID(taskID)
 
-    assert.NoError(t, err)
-    assert.Equal(t, expected, task)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, task)
+}
+
+func TestGetTaskByIDNotFound(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockTaskRepo := mocks.NewMockTaskRepository(ctrl)
+
+	taskID := "507f1f77bcf86cd799439011"
+	mockTaskRepo.EXPECT().GetTaskByID(taskID).Return(entities.Task{}, errors.TaskNotFoundError{})
+
+	taskUsecase := usecase.NewTaskUsecase(mockTaskRepo)
+	task, err := taskUsecase.GetTaskByID(taskID)
+
+	assert.Error(t, err)
+	assert.IsType(t, errors.TaskNotFoundError{}, err)
+	assert.Equal(t, entities.Task{}, task)
 }
 
 func TestAddTask(t *testing.T) {
 	ctrl := gomock.NewController(t)
-    defer ctrl.Finish()
+	defer ctrl.Finish()
 
-    mockTaskRepo := mocks.NewMockTaskRepository(ctrl)
+	mockTaskRepo := mocks.NewMockTaskRepository(ctrl)
 
-	task := domain.Task{
-		Title: "Test Task",
-		Description: "Test Description",
-		Status: "pending",
-	}
-	mockTaskRepo.EXPECT().AddTask(task).Return(task, nil)
+	task := entities.NewTask("Test Task", "Test Description", time.Now())
+	mockTaskRepo.EXPECT().AddTask(gomock.Any()).Return(task, nil)
 	
 	taskUsecase := usecase.NewTaskUsecase(mockTaskRepo)
 	result, err := taskUsecase.AddTask(task)
 
 	assert.NoError(t, err)
-	assert.Equal(t, task, result)
+	assert.Equal(t, task.Title, result.Title)
+	assert.Equal(t, task.Description, result.Description)
+	assert.Equal(t, "Pending", result.Status)
 }
 
 func TestGetTasks(t *testing.T) {
-    ctrl := gomock.NewController(t)
-    defer ctrl.Finish()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-    mockTaskRepo := mocks.NewMockTaskRepository(ctrl)
+	mockTaskRepo := mocks.NewMockTaskRepository(ctrl)
 
-    // sample data
-    expected := []domain.Task{
-        {
-            // ID:          objectID,
-            Title:       "Test Task",
-            Description: "Test Description",
-            Status:      "pending",
-        },
-        {
-            // ID:          objectID,
-            Title:       "Test Task 2",
-            Description: "Test Description 2",
-            Status:      "completed",
-        },
-    }
+	// sample data
+	expected := []entities.Task{
+		{
+			ID:          "1",
+			Title:       "Test Task",
+			Description: "Test Description",
+			Status:      "Pending",
+			DueDate:     time.Now(),
+		},
+		{
+			ID:          "2",
+			Title:       "Test Task 2",
+			Description: "Test Description 2",
+			Status:      "Completed",
+			DueDate:     time.Now(),
+		},
+	}
 
-    mockTaskRepo.EXPECT().GetTasks().Return(expected)
+	mockTaskRepo.EXPECT().GetTasks().Return(expected)
 
-    taskUsecase := usecase.NewTaskUsecase(mockTaskRepo)
-    tasks := taskUsecase.GetTasks()
+	taskUsecase := usecase.NewTaskUsecase(mockTaskRepo)
+	tasks := taskUsecase.GetTasks()
 
-    assert.Equal(t, expected, tasks)
+	assert.Equal(t, expected, tasks)
 }
 
 func TestUpdateTask(t *testing.T) {
@@ -93,18 +110,45 @@ func TestUpdateTask(t *testing.T) {
 
 	mockTaskRepo := mocks.NewMockTaskRepository(ctrl)
 
-	task := domain.Task{
-		Title: "Test Task",
-		Description: "Test Description",
-		Status: "pending",
+	taskID := "507f1f77bcf86cd799439011"
+	task := entities.Task{
+		ID:          taskID,
+		Title:       "Updated Task",
+		Description: "Updated Description",
+		Status:      "In Progress",
+		DueDate:     time.Now(),
 	}
-	mockTaskRepo.EXPECT().UpdateTask(task.ID.Hex(), task).Return(task, nil)
+	mockTaskRepo.EXPECT().UpdateTask(taskID, task).Return(task, nil)
 
 	taskUsecase := usecase.NewTaskUsecase(mockTaskRepo)
-	result, err := taskUsecase.UpdateTask(task.ID.Hex(), task)
+	result, err := taskUsecase.UpdateTask(taskID, task)
 
 	assert.NoError(t, err)
 	assert.Equal(t, task, result)
+}
+
+func TestUpdateTaskNotFound(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockTaskRepo := mocks.NewMockTaskRepository(ctrl)
+
+	taskID := "507f1f77bcf86cd799439011"
+	task := entities.Task{
+		ID:          taskID,
+		Title:       "Updated Task",
+		Description: "Updated Description",
+		Status:      "In Progress",
+		DueDate:     time.Now(),
+	}
+	mockTaskRepo.EXPECT().UpdateTask(taskID, task).Return(entities.Task{}, errors.TaskNotFoundError{})
+
+	taskUsecase := usecase.NewTaskUsecase(mockTaskRepo)
+	result, err := taskUsecase.UpdateTask(taskID, task)
+
+	assert.Error(t, err)
+	assert.IsType(t, errors.TaskNotFoundError{}, err)
+	assert.Equal(t, entities.Task{}, result)
 }
 
 func TestDeleteTask(t *testing.T) {
@@ -113,11 +157,27 @@ func TestDeleteTask(t *testing.T) {
 
 	mockTaskRepo := mocks.NewMockTaskRepository(ctrl)				
 
-	taskID := "1"
+	taskID := "507f1f77bcf86cd799439011"
 	mockTaskRepo.EXPECT().DeleteTask(taskID).Return(nil)
 
 	taskUsecase := usecase.NewTaskUsecase(mockTaskRepo)
 	err := taskUsecase.DeleteTask(taskID)
 
 	assert.NoError(t, err)
+}
+
+func TestDeleteTaskNotFound(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockTaskRepo := mocks.NewMockTaskRepository(ctrl)				
+
+	taskID := "507f1f77bcf86cd799439011"
+	mockTaskRepo.EXPECT().DeleteTask(taskID).Return(errors.TaskNotFoundError{})
+
+	taskUsecase := usecase.NewTaskUsecase(mockTaskRepo)
+	err := taskUsecase.DeleteTask(taskID)
+
+	assert.Error(t, err)
+	assert.IsType(t, errors.TaskNotFoundError{}, err)
 } 
